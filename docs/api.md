@@ -541,6 +541,36 @@ db.query({map: map}, {reduce: false}, function(err, response) { });
 }
 {% endhighlight %}
 
+if you pass a function to db.query and give it 'emit' as the second argument, then you can use a closure, (otherwise we have to use eval to bind emit)
+{% highlight js %}
+//BAD! will throw error
+(function (id) {
+  db.query(function(doc) {
+    if(doc._id === id) {
+      emit(doc);
+    }
+  }).then(dance);
+}(something));
+
+//will be fine
+(function (id) {
+  db.query(function(doc, emit) {
+    if(doc._id === id) {
+      emit(doc);
+    }
+  }).then(dance);
+}(something));
+{% endhighlight %}
+You don't actuallly have to call them by those names though
+{% highlight js %}
+(function (id) {
+  db.query(function(thisIs, awesome) {
+    if(thisIs._id === id) {
+      awesome(thisIs);
+    }
+  }).then(dance);
+}(something));
+{% endhighlight %}
 **Notes:**
 
 1. Local databases do not currently support view caching; everything is a live view.
